@@ -1,0 +1,9 @@
+# yst-img
+
+YST plugin for image operations.
+
+## Edit the go mod with you github username and try publishing the plugin to be listed on index for download
+
+- you may have to edit release.yml file for release on different platfor via CGo 
+- To run locally copy plugin to your `yeast` directory 
+
