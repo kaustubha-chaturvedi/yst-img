@@ -83,8 +83,7 @@ func processBatchFile(path, dst string, quality int, format string, maxSize stri
 	)
 
 	if quality == 0 {
-		// i am planning to make auto mode for image compression
-		// quality = auto(img, spec.Ext)
+		quality = auto(img, spec.Ext)
 	}
 		
 	if targetBytes > 0 {

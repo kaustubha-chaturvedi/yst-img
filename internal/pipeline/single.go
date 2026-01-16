@@ -22,8 +22,7 @@ func runSingle(input, output string, quality int, maxSize string, mode formats.M
 	spec := resolveOutput(output, targetBytes, mode)
 
 	if quality == 0 {
-		// i am planning to make auto mode for image compression
-		// quality = auto(img, spec.Ext)
+		quality = auto(img, spec.Ext)
 	}
 	
 	if targetBytes > 0 {
