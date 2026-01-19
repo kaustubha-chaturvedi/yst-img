@@ -54,7 +54,7 @@ func collectImages(root string) []string {
 			return nil
 		}
 		ext := strings.ToLower(filepath.Ext(path))
-		if ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".webp" {
+		if ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".webp" || ext == ".avif" {
 			files = append(files, path)
 		}
 		return nil

@@ -1,5 +1,7 @@
 package formats
 
+import "C"
+
 import (
 	"image"
 	"image/png"

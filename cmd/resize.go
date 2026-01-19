@@ -13,12 +13,12 @@ var resizeCmd = &cobra.Command{
 	Use:   "resize <input> [output]",
 	Short: "Resize an image",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if width <= 0 {
-			return fmt.Errorf("invalid width")
-		}
 		if len(args) < 1 {
 			cmd.Usage()
 			return fmt.Errorf("Missing required arguments :required input")
+		}
+		if width <= 0 {
+			return fmt.Errorf("invalid width")
 		}
 		input := args[0]
 

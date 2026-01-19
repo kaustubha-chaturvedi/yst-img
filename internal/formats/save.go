@@ -41,6 +41,8 @@ func Save(img image.Image, path, ext string, quality int, mode Mode) error {
 		return savePNG(img, path)
 	case ".webp":
 		return saveWebP(img, path, quality)
+	case ".avif":
+		return saveAVIF(img, path, quality)
 	default:
 		return fmt.Errorf("unsupported format: %s", ext)
 	}
