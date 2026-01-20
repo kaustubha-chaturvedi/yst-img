@@ -23,7 +23,7 @@ jobs:
             goarch: amd64
 
           - os: darwin
-            runner: macos-13
+            runner: macos-15
             goarch: amd64
 
           - os: darwin
