@@ -52,16 +52,22 @@ jobs:
       - name: Install macOS dependencies
         if: matrix.os == 'darwin'
         run: |
-          brew update
-          brew install libavif pkg-config
-          export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:/usr/local/lib/pkgconfig"
+          if [[ "$(uname -m)" == "arm64" ]]; then
+            brew install libavif pkg-config
+            echo "PKG_CONFIG_PATH=/opt/homebrew/lib/pkgconfig" >> $GITHUB_ENV
+          else
+            export HOMEBREW_NO_AUTO_UPDATE=1
+            export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+            brew install libavif pkg-config
+            echo "PKG_CONFIG_PATH=/usr/local/lib/pkgconfig" >> $GITHUB_ENV
+          fi
       
       - name: Build libavif for Windows (static)
         if: matrix.os == 'windows'
         shell: powershell
         run: |
           # Install vcpkg
-          git clone https://github.com/microsoft/vcpkg
+          git clone https://github.com/microsoft/vcpkg.git
           .\vcpkg\bootstrap-vcpkg.bat
 
           # Install static libavif (includes aom, dav1d, etc.)
