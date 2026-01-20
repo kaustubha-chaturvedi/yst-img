@@ -54,6 +54,28 @@ jobs:
         run: |
           brew update
           brew install libavif pkg-config
+          export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:/usr/local/lib/pkgconfig"
+      
+      - name: Build libavif for Windows (static)
+        if: matrix.os == 'windows'
+        shell: powershell
+        run: |
+          # Install vcpkg
+          git clone https://github.com/microsoft/vcpkg
+          .\vcpkg\bootstrap-vcpkg.bat
+
+          # Install static libavif (includes aom, dav1d, etc.)
+          .\vcpkg\vcpkg install libavif:x64-windows-static
+
+          # Create embed directory
+          New-Item -ItemType Directory -Path embed/windows/include -Force
+          New-Item -ItemType Directory -Path embed/windows/lib -Force
+
+          # Copy headers
+          Copy-Item "vcpkg/installed/x64-windows-static/include/avif" -Recurse -Destination "embed/windows/include/"
+
+          # Copy static lib
+          Copy-Item "vcpkg/installed/x64-windows-static/lib/avif.lib" -Destination "embed/windows/lib/"
 
       - name: Build plugin
         shell: bash
