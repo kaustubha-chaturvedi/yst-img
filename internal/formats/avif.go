@@ -12,9 +12,6 @@ package formats
 #include <stdint.h>
 #include <avif/avif.h>
 */
-
-
-// i had to take too much help from qwen for this apperently CGO libavif is very tugh to use
 import "C"
 
 import (

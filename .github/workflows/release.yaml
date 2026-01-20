@@ -47,13 +47,13 @@ jobs:
         if: matrix.os == 'linux'
         run: |
           sudo apt update
-          sudo apt install -y libavif-dev libheif-dev pkg-config
+          sudo apt install -y libavif-dev pkg-config
 
       - name: Install macOS dependencies
         if: matrix.os == 'darwin'
         run: |
           brew update
-          brew install libavif libheif pkg-config
+          brew install libavif pkg-config
 
       - name: Build plugin
         shell: bash
@@ -67,7 +67,7 @@ jobs:
           CGO_ENABLED=1 \
           GOOS=${{ matrix.os }} \
           GOARCH=${{ matrix.goarch }} \
-          go build -o dist/$BIN .
+          go build -tags avif -o dist/$BIN .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
