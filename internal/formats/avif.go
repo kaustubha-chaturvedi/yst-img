@@ -7,11 +7,7 @@ package formats
 #cgo linux pkg-config: libavif
 #cgo darwin pkg-config: libavif
 #cgo windows CFLAGS: -I${SRCDIR}/../../embed/windows/include
-#cgo windows LDFLAGS: -L${SRCDIR}/../../embed/windows/lib -lavif -lstdc++ -static
-
-
-#include <stdlib.h>
-#include <stdint.h>
+#cgo windows LDFLAGS: -L${SRCDIR}/../../embed/windows/lib -lavif -static
 #include <avif/avif.h>
 */
 import "C"

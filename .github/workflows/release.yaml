@@ -52,36 +52,29 @@ jobs:
       - name: Install macOS dependencies
         if: matrix.os == 'darwin'
         run: |
-          if [[ "$(uname -m)" == "arm64" ]]; then
-            brew install libavif pkg-config
-            echo "PKG_CONFIG_PATH=/opt/homebrew/lib/pkgconfig" >> $GITHUB_ENV
-          else
-            export HOMEBREW_NO_AUTO_UPDATE=1
-            export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-            brew install libavif pkg-config
-            echo "PKG_CONFIG_PATH=/usr/local/lib/pkgconfig" >> $GITHUB_ENV
-          fi
-      
-      - name: Build libavif for Windows (static)
+          brew update
+          brew install libavif pkg-config
+          echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig" >> $GITHUB_ENV
+
+      - name: Build libavif for Windows (static, MinGW)
         if: matrix.os == 'windows'
         shell: powershell
         run: |
-          # Install vcpkg
           git clone https://github.com/microsoft/vcpkg.git
           .\vcpkg\bootstrap-vcpkg.bat
 
-          # Install static libavif (includes aom, dav1d, etc.)
-          .\vcpkg\vcpkg install libavif:x64-windows-static
+          # IMPORTANT: Use x64-mingw-static for Go/CGO compatibility
+          .\vcpkg\vcpkg install libavif:x64-mingw-static
 
-          # Create embed directory
+          # Create embed dirs
           New-Item -ItemType Directory -Path embed/windows/include -Force
           New-Item -ItemType Directory -Path embed/windows/lib -Force
 
           # Copy headers
-          Copy-Item "vcpkg/installed/x64-windows-static/include/avif" -Recurse -Destination "embed/windows/include/"
+          Copy-Item "vcpkg/installed/x64-mingw-static/include/avif" -Recurse -Destination "embed/windows/include/"
 
-          # Copy static lib
-          Copy-Item "vcpkg/installed/x64-windows-static/lib/avif.lib" -Destination "embed/windows/lib/"
+          # Copy MinGW static library as libavif.a (required by linker)
+          Copy-Item "vcpkg/installed/x64-mingw-static/lib/libavif.a" -Destination "embed/windows/lib/libavif.a"
 
       - name: Build plugin
         shell: bash
@@ -95,14 +88,14 @@ jobs:
           CGO_ENABLED=1 \
           GOOS=${{ matrix.os }} \
           GOARCH=${{ matrix.goarch }} \
-          go build -tags avif -o dist/$BIN .
+          go build -tags avif -o "dist/$BIN" .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: yst-img-${{ matrix.os }}-${{ matrix.goarch }}
           path: dist/*
-      
+
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
@@ -131,4 +124,3 @@ jobs:
           files: release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
