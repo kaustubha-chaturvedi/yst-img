@@ -1,9 +1,48 @@
 # yst-img
 
-YST plugin for image operations.
+Fast, content-aware image converter & compressor for Yeast.
 
-## Edit the go mod with you github username and try publishing the plugin to be listed on index for download
+## Features
 
-- you may have to edit release.yml file for release on different platfor via CGo 
-- To run locally copy plugin to your `yeast` directory 
+- Convert and compress images
+- Automatic batch mode (just pass a directory)
+- Parallel processing (default 4 workers)
+- Smart auto-quality (content-aware)
+- AVIF (AV1) encode & decode
+- Clean CLI output
 
+## Installation
+
+```bash
+yst plugins install kaustubha-chaturvedi:yst-img
+```
+
+## Usage
+
+### Convert
+```bash
+yst-img convert input.png output.avif
+```
+
+### Compress
+```bash
+yst-img compress ./images ./out
+```
+
+### Batch options
+```bash
+yst-img compress ./images ./out --workers 8 --quality 60
+```
+
+### Auto mode(default)
+```bash
+yst-img convert input.jpg output.avif
+```
+
+
+### Supported formats
+
+- Input: PNG, JPEG, WEBP
+- Output: PNG, JPEG, WEBP, AVIF
+
+#### THIS README WAS WRITTEN BY [QWEN](https://chat.qwen.ai/) 
