@@ -23,10 +23,6 @@ jobs:
             goarch: amd64
 
           - os: darwin
-            runner: macos-15
-            goarch: amd64
-
-          - os: darwin
             runner: macos-latest
             goarch: arm64
 
@@ -43,6 +39,7 @@ jobs:
         with:
           go-version: "1.25.4"
 
+      # --- Linux ---
       - name: Install Linux dependencies
         if: matrix.os == 'linux'
         run: |
@@ -56,25 +53,35 @@ jobs:
           brew install libavif pkg-config
           echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig" >> $GITHUB_ENV
 
+      - name: Cache vcpkg
+        if: matrix.os == 'windows'
+        uses: actions/cache@v4
+        with:
+          path: vcpkg
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-
+
       - name: Build libavif for Windows (static, MinGW)
         if: matrix.os == 'windows'
         shell: powershell
         run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
+          if (!(Test-Path vcpkg)) {
+            git clone https://github.com/microsoft/vcpkg.git
+            .\vcpkg\bootstrap-vcpkg.bat
+          }
 
-          # IMPORTANT: Use x64-mingw-static for Go/CGO compatibility
           .\vcpkg\vcpkg install libavif:x64-mingw-static
 
-          # Create embed dirs
           New-Item -ItemType Directory -Path embed/windows/include -Force
           New-Item -ItemType Directory -Path embed/windows/lib -Force
 
           # Copy headers
           Copy-Item "vcpkg/installed/x64-mingw-static/include/avif" -Recurse -Destination "embed/windows/include/"
 
-          # Copy MinGW static library as libavif.a (required by linker)
+          # Copy BOTH libavif AND libyuv (required!)
           Copy-Item "vcpkg/installed/x64-mingw-static/lib/libavif.a" -Destination "embed/windows/lib/libavif.a"
+          Copy-Item "vcpkg/installed/x64-mingw-static/lib/libyuv.a"  -Destination "embed/windows/lib/libyuv.a"
 
       - name: Build plugin
         shell: bash
