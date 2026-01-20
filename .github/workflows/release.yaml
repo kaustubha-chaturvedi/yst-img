@@ -3,7 +3,7 @@ name: Auto Plugin Release
 on:
   workflow_dispatch:
   push:
-    branches: 
+    branches:
       - main
       - master
     tags:
@@ -39,7 +39,6 @@ jobs:
         with:
           go-version: "1.25.4"
 
-      # --- Linux ---
       - name: Install Linux dependencies
         if: matrix.os == 'linux'
         run: |
@@ -53,33 +52,33 @@ jobs:
           brew install libavif pkg-config
           echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig" >> $GITHUB_ENV
 
-      - name: Cache vcpkg
+      - name: Set up vcpkg binary cache
+        if: matrix.os == 'windows'
+        shell: powershell
+        run: |
+          $env:VCPKG_DEFAULT_BINARY_CACHE = "$HOME\.vcpkg\archives"
+          mkdir -Force "$HOME\.vcpkg\archives"
+
+      - name: Cache vcpkg binary cache
         if: matrix.os == 'windows'
         uses: actions/cache@v4
         with:
-          path: vcpkg
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-vcpkg-
+          path: ~/.vcpkg/archives
+          key: windows-vcpkg-archives-${{ hashFiles('**/go.sum') }}
 
       - name: Build libavif for Windows (static, MinGW)
         if: matrix.os == 'windows'
         shell: powershell
         run: |
-          if (!(Test-Path vcpkg)) {
-            git clone https://github.com/microsoft/vcpkg.git
-            .\vcpkg\bootstrap-vcpkg.bat
-          }
-
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+          $env:VCPKG_DEFAULT_BINARY_CACHE = "$HOME\.vcpkg\archives"
           .\vcpkg\vcpkg install libavif:x64-mingw-static
 
           New-Item -ItemType Directory -Path embed/windows/include -Force
           New-Item -ItemType Directory -Path embed/windows/lib -Force
 
-          # Copy headers
           Copy-Item "vcpkg/installed/x64-mingw-static/include/avif" -Recurse -Destination "embed/windows/include/"
-
-          # Copy BOTH libavif AND libyuv (required!)
           Copy-Item "vcpkg/installed/x64-mingw-static/lib/libavif.a" -Destination "embed/windows/lib/libavif.a"
           Copy-Item "vcpkg/installed/x64-mingw-static/lib/libyuv.a"  -Destination "embed/windows/lib/libyuv.a"
 
@@ -109,6 +108,7 @@ jobs:
     needs: build
     permissions:
       contents: write
+    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - name: Checkout
@@ -128,6 +128,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
