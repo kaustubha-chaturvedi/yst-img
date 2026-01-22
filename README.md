@@ -8,7 +8,7 @@ Fast, content-aware image converter & compressor for Yeast.
 - Automatic batch mode (just pass a directory)
 - Parallel processing (default 4 workers)
 - Smart auto-quality (content-aware)
-- AVIF (AV1) encode & decode
+- AVIF (AV1) conversion
 - Clean CLI output
 
 ## Installation
